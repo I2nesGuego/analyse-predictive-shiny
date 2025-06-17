@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Logo" width="200"/>
+</p>
+
 # Application Shiny – Analyse Prédictive
 
 Cette application a été développée dans le cadre d’un **mémoire-projet de Licence MIASHS (IMA – UCO Angers)**.  
