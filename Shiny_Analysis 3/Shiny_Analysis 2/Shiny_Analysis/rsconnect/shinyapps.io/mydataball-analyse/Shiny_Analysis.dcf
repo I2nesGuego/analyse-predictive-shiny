@@ -1,0 +1,12 @@
+name: Shiny_Analysis
+title: Shiny_Analysis
+username: mydataball-analyse
+account: mydataball-analyse
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14949538
+bundleId: 10471681
+url: https://mydataball-analyse.shinyapps.io/Shiny_Analysis/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

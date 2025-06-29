@@ -34,14 +34,80 @@ server <- function(input, output, session) {
     handle_data_upload(input, output, data)
   })
   
-  # Fenêtre de paramétrage des modèles
   observeEvent(input$adjust_params, {
-    show_parameter_modal(input, model_params, output, session)
+    showModal(modalDialog(
+      title = "Ajuster les paramètres",
+      tagList(
+        if ("Régression logistique" %in% input$analysis_choices) {
+          tagList(
+            h4("Régression logistique"),
+            sliderInput("logistic_threshold_modal","Seuil", min = 0, max = 1, value = model_params$logistic_threshold, step = 0.01)
+          )
+        },
+        if ("Régression linéaire" %in% input$analysis_choices) {
+          tagList(
+            h4("Régression linéaire"),
+            numericInput("linreg_targets_modal", "Nombre de cibles", value = model_params$linreg_targets, min = 1)
+          )
+        },
+        if ("Réseaux de neurones" %in% input$analysis_choices) {
+          tagList(
+            h4("Réseaux de neurones"),
+            numericInput("nn_layers_modal", "Nombre de couches", value = model_params$nn_layers, min = 1),
+            uiOutput("nn_neurons_ui"),
+            selectInput("nn_activation_modal", "Fonction d'activation", choices = c("relu", "sigmoid", "tanh"), selected = model_params$nn_activation)
+          )
+        },
+        if ("Random Forest" %in% input$analysis_choices) {
+          tagList(
+            h4("Random Forest"),
+            numericInput("rf_trees_modal", "Nombre d'arbres", value = model_params$rf_trees, min = 1)
+          )
+        },
+        if ("Arbres de Décision" %in% input$analysis_choices) {
+          tagList(
+            h4("Arbres de Décision"),
+            sliderInput("tree_threshold_modal", "Seuil", min = 0, max = 1, value = model_params$tree_threshold, step = 0.01)
+          )
+        }
+      ),
+      footer = tagList(
+        modalButton("Annuler"),
+        actionButton("save_params", "Enregistrer")
+      )
+    ))
   })
   
-  # Sauvegarde des paramètres dans la fenêtre modale
+  observeEvent(input$nn_layers_modal, {
+    model_params$nn_layers <- input$nn_layers_modal
+    output$nn_neurons_ui <- renderUI({
+      lapply(1:model_params$nn_layers, function(i) {
+        numericInput(
+          paste0("nn_neurons_", i),
+          paste("Nombre de neurones pour la couche", i),
+          value = if (!is.null(model_params$nn_neurons) && length(model_params$nn_neurons) >= i) {
+            model_params$nn_neurons[[i]]
+          } else {
+            10
+          },
+          min = 1
+        )
+      })
+    })
+  })
+  
+  
   observeEvent(input$save_params, {
-    save_model_parameters(input, model_params)
+    if (!is.null(input$logistic_threshold_modal)) model_params$logistic_threshold <- input$logistic_threshold_modal
+    if (!is.null(input$linreg_targets_modal)) model_params$linreg_targets <- input$linreg_targets_modal
+    if (!is.null(input$nn_layers_modal)) model_params$nn_layers <- input$nn_layers_modal
+    if (!is.null(input$nn_activation_modal)) model_params$nn_activation <- input$nn_activation_modal
+    if (!is.null(input$rf_trees_modal)) model_params$rf_trees <- input$rf_trees_modal
+    if (!is.null(input$tree_threshold_modal)) model_params$tree_threshold <- input$tree_threshold_modal
+    
+    model_params$nn_neurons <- lapply(1:model_params$nn_layers, function(i) {
+      input[[paste0("nn_neurons_", i)]]
+    })
     removeModal()
   })
   
